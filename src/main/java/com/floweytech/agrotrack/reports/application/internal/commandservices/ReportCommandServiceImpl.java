@@ -10,6 +10,8 @@ import com.floweytech.agrotrack.reports.domain.model.valueobjects.ReportPeriod;
 import com.floweytech.agrotrack.reports.domain.services.ReportCommandService;
 import com.floweytech.agrotrack.reports.infrastructure.persistence.jpa.ReportRepository;
 import com.floweytech.agrotrack.reports.shared.interfaces.rest.resources.ReadingResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
@@ -29,6 +31,8 @@ import java.util.List;
  */
 @Service
 public class ReportCommandServiceImpl implements ReportCommandService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ReportCommandServiceImpl.class);
+
     private final ReportRepository reportRepository;
     private final ExternalOrganizationService externalOrganizationService;
     private final ExternalMonitoringService externalMonitoringService;
@@ -127,6 +131,13 @@ public class ReportCommandServiceImpl implements ReportCommandService {
         try {
             reportRepository.save(report);
         } catch (Exception e) {
+            LOGGER.error("Error saving report for plot {} organization {} metric {} period {} - {}",
+                    command.plotId().value(),
+                    command.organizationId().value(),
+                    command.metricType(),
+                    period,
+                    e.getMessage(),
+                    e);
             String errorMessage = messageSource.getMessage("report.save.error", null, LocaleContextHolder.getLocale());
             throw new IllegalArgumentException(errorMessage);
         }

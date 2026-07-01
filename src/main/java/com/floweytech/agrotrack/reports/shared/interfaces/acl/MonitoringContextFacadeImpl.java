@@ -5,7 +5,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.client.RestClient;
 
 import java.time.LocalDateTime;
@@ -60,6 +63,8 @@ public class MonitoringContextFacadeImpl implements MonitoringContextFacade {
                             .queryParam("start", start.format(FORMATTER))
                             .queryParam("end", end.format(FORMATTER))
                             .build(plotId))
+                    .headers(headers -> currentAuthorizationHeader()
+                            .ifPresent(value -> headers.set(HttpHeaders.AUTHORIZATION, value)))
                     .retrieve()
                     .body(new ParameterizedTypeReference<>() {});
 
@@ -74,5 +79,16 @@ public class MonitoringContextFacadeImpl implements MonitoringContextFacade {
                     plotId, e.getMessage());
             return Collections.emptyList();
         }
+    }
+
+    private java.util.Optional<String> currentAuthorizationHeader() {
+        var attributes = RequestContextHolder.getRequestAttributes();
+        if (attributes instanceof ServletRequestAttributes servletRequestAttributes) {
+            var authorization = servletRequestAttributes.getRequest().getHeader(HttpHeaders.AUTHORIZATION);
+            if (authorization != null && !authorization.isBlank()) {
+                return java.util.Optional.of(authorization);
+            }
+        }
+        return java.util.Optional.empty();
     }
 }
