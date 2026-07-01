@@ -3,8 +3,11 @@ package com.floweytech.agrotrack.reports.shared.interfaces.acl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 
@@ -42,6 +45,8 @@ public class OrganizationContextFacadeImpl implements OrganizationContextFacade 
         try {
             restClient.get()
                     .uri("/api/v1/plots/{plotId}", plotId)
+                    .headers(headers -> currentAuthorizationHeader()
+                            .ifPresent(value -> headers.set(HttpHeaders.AUTHORIZATION, value)))
                     .retrieve()
                     .toBodilessEntity();
             return true;
@@ -56,5 +61,16 @@ public class OrganizationContextFacadeImpl implements OrganizationContextFacade 
             LOGGER.error("Could not reach organization-service to check plot {}: {}", plotId, e.getMessage());
             return false;
         }
+    }
+
+    private java.util.Optional<String> currentAuthorizationHeader() {
+        var attributes = RequestContextHolder.getRequestAttributes();
+        if (attributes instanceof ServletRequestAttributes servletRequestAttributes) {
+            var authorization = servletRequestAttributes.getRequest().getHeader(HttpHeaders.AUTHORIZATION);
+            if (authorization != null && !authorization.isBlank()) {
+                return java.util.Optional.of(authorization);
+            }
+        }
+        return java.util.Optional.empty();
     }
 }

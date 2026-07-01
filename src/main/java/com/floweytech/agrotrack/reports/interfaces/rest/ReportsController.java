@@ -98,7 +98,7 @@ public class ReportsController {
      * @param reportId The report id
      * @return The {@link ReportResource} resource for the report
      */
-    @GetMapping("reports/{reportId}")
+    @GetMapping("/reports/{reportId}")
     @Operation(summary = "Get Report by id", description = "Get report by id")
     @ApiResponses( value = {
             @ApiResponse(responseCode = "200", description = "Report found"),
