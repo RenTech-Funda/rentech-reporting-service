@@ -9,14 +9,11 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-
     steps:
       - uses: actions/checkout@v4
 
       - name: Set up Java version
-        uses: azure/setup-java@v4
+        uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'microsoft'
