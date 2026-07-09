@@ -29,6 +29,7 @@ jobs:
         with:
           name: java-app
           path: 'target/reports-services-0.0.1-SNAPSHOT.jar'
+          retention-days: 1
 
   deploy:
     runs-on: ubuntu-latest
@@ -42,6 +43,9 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: java-app
+  
+      - name: Rename JAR to app.jar
+        run: mv reports-services-0.0.1-SNAPSHOT.jar app.jar
 
       - name: Login to Azure
         uses: azure/login@v2
