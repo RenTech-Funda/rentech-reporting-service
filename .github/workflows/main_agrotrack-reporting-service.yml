@@ -24,11 +24,14 @@ jobs:
       - name: Build with Maven
         run: mvn clean package -Dmaven.test.skip=true
 
+      - name: Rename JAR to app.jar
+        run: mv target/reports-services-0.0.1-SNAPSHOT.jar target/app.jar
+
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: java-app
-          path: 'target/reports-services-0.0.1-SNAPSHOT.jar'
+          path: 'target/app.jar'
           retention-days: 1
 
   deploy:
@@ -43,9 +46,6 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: java-app
-  
-      - name: Rename JAR to app.jar
-        run: mv reports-services-0.0.1-SNAPSHOT.jar app.jar
 
       - name: Login to Azure
         uses: azure/login@v2
@@ -60,4 +60,4 @@ jobs:
         with:
           app-name: 'agrotrack-reporting-service'
           slot-name: 'Production'
-          package: 'reports-services-0.0.1-SNAPSHOT.jar'
+          package: 'app.jar'
